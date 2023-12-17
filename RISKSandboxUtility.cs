@@ -163,6 +163,8 @@ namespace RISKSandboxUtility
             terrtoryTextBox.Name = territoryName + "_TextBox";
             terrtoryTextBox.Size = new Size(134, 22);
             terrtoryTextBox.Text = territoryName;
+            terrtoryTextBox.ReadOnly = true;
+            terrtoryTextBox.TabStop = false;
 
             setTroopsButton.BackgroundImage = Properties.Resources.TroopsImage;
             setTroopsButton.BackgroundImageLayout = ImageLayout.Stretch;
