@@ -60,5 +60,6 @@ namespace RISKSandboxUtility
 
         private List<TextBox> territoryTextBoxes;
         private List<List<Button>> territoryButtons;
+        private Button button1;
     }
 }
