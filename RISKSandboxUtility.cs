@@ -170,6 +170,7 @@ namespace RISKSandboxUtility
             setTroopsButton.Name = territoryName + "_Troops_Button";
             setTroopsButton.Size = new Size(32, 23);
             setTroopsButton.UseVisualStyleBackColor = true;
+            setTroopsButton.Click += SetTroopsButton_Click;
 
             setCapitalButton.BackgroundImage = Properties.Resources.CapitalImage;
             setCapitalButton.BackgroundImageLayout = ImageLayout.Stretch;
@@ -185,6 +186,7 @@ namespace RISKSandboxUtility
             setBlizzardButton.Name = territoryName + "_Blizzard_Button";
             setBlizzardButton.Size = new Size(32, 23);
             setBlizzardButton.UseVisualStyleBackColor = true;
+            setBlizzardButton.Click += SetBlizzardButton_Click;
 
             territoriesPanel.Controls.Add(terrtoryTextBox);
             territoriesPanel.Controls.Add(setTroopsButton);
@@ -204,6 +206,30 @@ namespace RISKSandboxUtility
                 territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET, 
                 BitConverter.GetBytes((int)TerritoryType.Capital), 
                 MemoryConstants.INT_BYTES, 
+                out bytesRead);
+        }
+
+        private void SetBlizzardButton_Click(object sender, EventArgs e)
+        {
+            var territoryName = ((Button)sender).Name.Split("_")[0];
+            IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET, BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET, BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + 0xB0, BitConverter.GetBytes(IntPtr.Zero.ToInt32()), MemoryConstants.INT_BYTES, out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET, BitConverter.GetBytes((int)TerritoryType.Blizzard), MemoryConstants.INT_BYTES, out bytesRead);
+        }
+
+        private void SetTroopsButton_Click(object sender, EventArgs e)
+        {
+            var territoryName = ((Button)sender).Name.Split("_")[0];
+            var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox("How many troops would you like on " + territoryName, "Set Troops", ""));
+
+            IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
+            WriteProcessMemory(
+                riskProcess.Handle, 
+                territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET, 
+                BitConverter.GetBytes(troopCount), 
+                MemoryConstants.POINTER_BYTES, 
                 out bytesRead);
         }
     }
