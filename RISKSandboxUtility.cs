@@ -30,10 +30,11 @@ namespace RISKSandboxUtility
 
         public RISKSandboxUtility()
         {
+            InitializeComponent();
+
             territoryTextBoxes = new List<TextBox>();
             territoryButtons = new List<List<Button>>();
 
-            InitializeComponent();
             GetRISKData();
             SetRISKDataInComponent();
 
@@ -138,6 +139,7 @@ namespace RISKSandboxUtility
 
         void SetRISKDataInComponent()
         {
+            territoriesPanel.SuspendLayout();
             List<String> territoryNames = territoryNamesToAdresses.Keys.ToList();
             for (int i = 0; i < territoryNamesToAdresses.Count(); ++i)
             {
@@ -147,8 +149,6 @@ namespace RISKSandboxUtility
 
         private void AddTerritoryInTool(string territoryName, int index)
         {
-            territoriesPanel.SuspendLayout();
-            SuspendLayout();
 
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKSandboxUtility));
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
@@ -202,10 +202,10 @@ namespace RISKSandboxUtility
             var territoryName = ((Button)sender).Name.Split("_")[0];
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
             WriteProcessMemory(
-                riskProcess.Handle, 
-                territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET, 
-                BitConverter.GetBytes((int)TerritoryType.Capital), 
-                MemoryConstants.INT_BYTES, 
+                riskProcess.Handle,
+                territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+                BitConverter.GetBytes((int)TerritoryType.Capital),
+                MemoryConstants.INT_BYTES,
                 out bytesRead);
         }
 
@@ -226,10 +226,10 @@ namespace RISKSandboxUtility
 
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
             WriteProcessMemory(
-                riskProcess.Handle, 
-                territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET, 
-                BitConverter.GetBytes(troopCount), 
-                MemoryConstants.POINTER_BYTES, 
+                riskProcess.Handle,
+                territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
+                BitConverter.GetBytes(troopCount),
+                MemoryConstants.POINTER_BYTES,
                 out bytesRead);
         }
     }

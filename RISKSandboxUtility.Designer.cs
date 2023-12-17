@@ -38,6 +38,8 @@ namespace RISKSandboxUtility
             // 
             // territoriesPanel
             // 
+            territoriesPanel.BackColor = Color.White;
+            territoriesPanel.BorderStyle = BorderStyle.FixedSingle;
             territoriesPanel.Location = new Point(12, 238);
             territoriesPanel.Name = "territoriesPanel";
             territoriesPanel.Size = new Size(313, 361);
