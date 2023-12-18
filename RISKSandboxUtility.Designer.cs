@@ -34,6 +34,7 @@ namespace RISKSandboxUtility
         {
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             territoriesPanel = new Panel();
+            loadCsvButton = new Button();
             SuspendLayout();
             // 
             // territoriesPanel
@@ -45,11 +46,22 @@ namespace RISKSandboxUtility
             territoriesPanel.Size = new Size(313, 361);
             territoriesPanel.TabIndex = 3;
             // 
+            // loadCsvButton
+            // 
+            loadCsvButton.Location = new Point(15, 205);
+            loadCsvButton.Name = "loadCsvButton";
+            loadCsvButton.Size = new Size(75, 23);
+            loadCsvButton.TabIndex = 4;
+            loadCsvButton.Text = "Load CSV";
+            loadCsvButton.UseVisualStyleBackColor = true;
+            loadCsvButton.Click += loadCsvButton_Click;
+            // 
             // RISKSandboxUtility
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1018, 621);
+            Controls.Add(loadCsvButton);
             Controls.Add(territoriesPanel);
             Name = "RISKSandboxUtility";
             Text = "RISK Sandbox Utitlity";
@@ -63,5 +75,6 @@ namespace RISKSandboxUtility
         private List<TextBox> territoryTextBoxes;
         private List<List<Button>> territoryButtons;
         private Button button1;
+        private Button loadCsvButton;
     }
 }

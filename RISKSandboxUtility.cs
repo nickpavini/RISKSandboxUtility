@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace RISKSandboxUtility
@@ -94,7 +95,7 @@ namespace RISKSandboxUtility
 
                 ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + StringOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead);
                 ReadProcessMemory(riskProcess.Handle, territoryNameAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
-                String territoryName = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray());
+                String territoryName = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
                 territoryNamesToAdresses.Add(territoryName, territoryAddress);
 
@@ -108,7 +109,7 @@ namespace RISKSandboxUtility
 
                 ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead);
                 ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
-                String color = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray());
+                String color = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
                 if (!playerColorsToAddresses.ContainsKey(color.Replace("color_", "")))
                 {
@@ -126,7 +127,7 @@ namespace RISKSandboxUtility
 
                 ReadProcessMemory(riskProcess.Handle, regionNameAddress + StringOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead); // memory is stored as ascii and not unicode
                 ReadProcessMemory(riskProcess.Handle, regionNameAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
-                String regionName = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray());
+                String regionName = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
                 if (!regionNamesToAddresses.ContainsKey(regionName))
                 {
@@ -162,7 +163,7 @@ namespace RISKSandboxUtility
             terrtoryTextBox.Location = new Point(10, 23 + 30 * index);
             terrtoryTextBox.Name = territoryName + "_TextBox";
             terrtoryTextBox.Size = new Size(134, 22);
-            terrtoryTextBox.Text = territoryName;
+            terrtoryTextBox.Text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(territoryName);
             terrtoryTextBox.ReadOnly = true;
             terrtoryTextBox.TabStop = false;
 
@@ -202,37 +203,121 @@ namespace RISKSandboxUtility
         private void SetCapitalButton_Click(object sender, EventArgs e)
         {
             var territoryName = ((Button)sender).Name.Split("_")[0];
+            SetCapital(territoryName);
+        }
+
+        private void SetCapital(String territoryName)
+        {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(
-                riskProcess.Handle,
-                territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
-                BitConverter.GetBytes((int)TerritoryType.Capital),
-                MemoryConstants.INT_BYTES,
-                out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+                BitConverter.GetBytes((int)TerritoryType.Capital),  MemoryConstants.INT_BYTES, out bytesRead);
         }
 
         private void SetBlizzardButton_Click(object sender, EventArgs e)
         {
             var territoryName = ((Button)sender).Name.Split("_")[0];
+            SetBlizzard(territoryName);
+        }
+
+        private void SetBlizzard(String territoryName)
+        {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET, BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET, BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + 0xB0, BitConverter.GetBytes(IntPtr.Zero.ToInt32()), MemoryConstants.INT_BYTES, out bytesRead);
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET, BitConverter.GetBytes((int)TerritoryType.Blizzard), MemoryConstants.INT_BYTES, out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET, 
+                BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET, 
+                BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+                BitConverter.GetBytes((int)TerritoryType.Blizzard), MemoryConstants.INT_BYTES, out bytesRead);
         }
 
         private void SetTroopsButton_Click(object sender, EventArgs e)
         {
             var territoryName = ((Button)sender).Name.Split("_")[0];
-            var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox("How many troops would you like on " + territoryName, "Set Troops", ""));
+            var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox(
+                "How many troops would you like on " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(territoryName), 
+                "Set Troops", 
+                ""));
+            SetTroops(territoryName, troopCount);
+        }
 
+        private void SetTroops(String territoryName, int troopCount)
+        {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(
-                riskProcess.Handle,
-                territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
-                BitConverter.GetBytes(troopCount),
-                MemoryConstants.POINTER_BYTES,
-                out bytesRead);
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
+                BitConverter.GetBytes(troopCount), MemoryConstants.POINTER_BYTES, out bytesRead);
+        }
+
+        private void SetColor(String territoryName, String color) 
+        {
+            IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
+            IntPtr playerPtr = playerColorsToAddresses[color];
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET, 
+                BitConverter.GetBytes(playerPtr.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
+        }
+
+        private void SetRegularTerritory(String territoryName)
+        {
+            IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+                BitConverter.GetBytes((int)TerritoryType.Regular), MemoryConstants.INT_BYTES, out bytesRead);
+        }
+
+        private void loadCsvButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            openFileDialog.InitialDirectory = "c:\\";
+            openFileDialog.Filter = "CSV files|*.csv;";
+            openFileDialog.FilterIndex = 0;
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            String selectedFileName = openFileDialog.FileName;
+            parseCsv(selectedFileName);
+        }
+
+        private void parseCsv(String fileName)
+        {
+            var lines = File.ReadLines(fileName);
+            foreach (var line in lines)
+            {
+                var fields = line.ToLower().Split(',');
+                if (fields.Length != CSVConstants.NUM_COLS 
+                    || !territoryNamesToAdresses.ContainsKey(fields[CSVConstants.TERRITORY_NAME])
+                    || !playerColorsToAddresses.ContainsKey(fields[CSVConstants.COLOR])
+                    || !int.TryParse(fields[CSVConstants.TERRITORY_TYPE], out _)
+                    || !Enum.IsDefined(typeof(TerritoryType), int.Parse(fields[CSVConstants.TERRITORY_TYPE]))
+                    || !int.TryParse(fields[CSVConstants.TROOP_COUNT], out _))
+                {
+                    continue;
+                }
+
+                SetColor(fields[CSVConstants.TERRITORY_NAME], fields[CSVConstants.COLOR]);
+                SetTroops(fields[CSVConstants.TERRITORY_NAME], int.Parse(fields[CSVConstants.TROOP_COUNT]));
+                SetTerritoryType(fields[CSVConstants.TERRITORY_NAME], int.Parse(fields[CSVConstants.TERRITORY_TYPE]));
+            }
+        }
+
+        private void SetTerritoryType(String territoryName, int territoryType)
+        {
+            switch (territoryType)
+            {
+                case (int)TerritoryType.Regular:
+                    SetRegularTerritory(territoryName);
+                    break;
+                case (int)TerritoryType.Capital:
+                    SetCapital(territoryName);
+                    break;
+                case (int)TerritoryType.Blizzard:
+                    SetBlizzard(territoryName);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

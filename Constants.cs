@@ -54,6 +54,15 @@ namespace RISKSandboxUtility
         public const int POINTER_BYTES = 0x8;
     }
 
+    public static class CSVConstants
+    {
+        public const int TERRITORY_NAME = 0;
+        public const int COLOR = 1;
+        public const int TERRITORY_TYPE = 2;
+        public const int TROOP_COUNT = 3;
+        public const int NUM_COLS = 4;
+    }
+
     enum TerritoryType
     {
         Regular = 0,
