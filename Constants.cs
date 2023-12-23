@@ -40,6 +40,7 @@ namespace RISKSandboxUtility
     public static class PlayerOffsets
     {
         public const int COLOR_OFFSET = 0x40;
+        public const int PLACEABLE_TROOPS_OFFSET = 0xD0;
     }
 
     public static class StringOffsets

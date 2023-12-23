@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace RISKSandboxUtility
 {
-    partial class RISKSandboxUtility
+    partial class RISKHack
     {
 
         /// <summary>
@@ -35,6 +35,7 @@ namespace RISKSandboxUtility
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             territoriesPanel = new Panel();
             loadCsvButton = new Button();
+            playersPanel = new Panel();
             SuspendLayout();
             // 
             // territoriesPanel
@@ -56,15 +57,25 @@ namespace RISKSandboxUtility
             loadCsvButton.UseVisualStyleBackColor = true;
             loadCsvButton.Click += loadCsvButton_Click;
             // 
-            // RISKSandboxUtility
+            // playersPanel
+            // 
+            playersPanel.BackColor = Color.White;
+            playersPanel.BorderStyle = BorderStyle.FixedSingle;
+            playersPanel.Location = new Point(15, 12);
+            playersPanel.Name = "playersPanel";
+            playersPanel.Size = new Size(313, 138);
+            playersPanel.TabIndex = 4;
+            // 
+            // RISKHack
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1018, 621);
+            ClientSize = new Size(340, 621);
+            Controls.Add(playersPanel);
             Controls.Add(loadCsvButton);
             Controls.Add(territoriesPanel);
-            Name = "RISKSandboxUtility";
-            Text = "RISK Sandbox Utitlity";
+            Name = "RISKHack";
+            Text = "RISK Hack ";
             ResumeLayout(false);
         }
 
@@ -76,5 +87,6 @@ namespace RISKSandboxUtility
         private List<List<Button>> territoryButtons;
         private Button button1;
         private Button loadCsvButton;
+        private Panel playersPanel;
     }
 }

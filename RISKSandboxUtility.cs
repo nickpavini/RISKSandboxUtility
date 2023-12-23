@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace RISKSandboxUtility
 {
-    public partial class RISKSandboxUtility : Form
+    public partial class RISKHack : Form
     {
         [DllImport("kernel32.dll")]
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer,
@@ -29,7 +29,7 @@ namespace RISKSandboxUtility
 
         Process riskProcess;
 
-        public RISKSandboxUtility()
+        public RISKHack()
         {
             InitializeComponent();
 
@@ -42,6 +42,10 @@ namespace RISKSandboxUtility
             territoriesPanel.VerticalScroll.Enabled = true;
             territoriesPanel.VerticalScroll.Visible = true;
             territoriesPanel.VerticalScroll.Maximum = MAX_SCROLL_SIZE;
+
+            playersPanel.VerticalScroll.Enabled = true;
+            playersPanel.VerticalScroll.Visible = true;
+            playersPanel.VerticalScroll.Maximum = MAX_SCROLL_SIZE;
         }
 
         void GetRISKData()
@@ -141,18 +145,24 @@ namespace RISKSandboxUtility
         void SetRISKDataInComponent()
         {
             territoriesPanel.SuspendLayout();
+            playersPanel.SuspendLayout();
             List<String> territoryNames = territoryNamesToAdresses.Keys.ToList();
             for (int i = 0; i < territoryNamesToAdresses.Count(); ++i)
             {
                 AddTerritoryInTool(territoryNames[i], i);
+            }
+
+            List<String> playerColors = playerColorsToAddresses.Keys.ToList();
+            for (int i = 0; i < playerColorsToAddresses.Count(); ++i)
+            {
+                AddPlayerInTool(playerColors[i], i);
             }
         }
 
         private void AddTerritoryInTool(string territoryName, int index)
         {
 
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKSandboxUtility));
-            backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKHack));
             TextBox terrtoryTextBox = new TextBox();
             Button setTroopsButton = new Button();
             Button setCapitalButton = new Button();
@@ -160,7 +170,7 @@ namespace RISKSandboxUtility
 
             terrtoryTextBox.BackColor = SystemColors.Control;
             terrtoryTextBox.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
-            terrtoryTextBox.Location = new Point(10, 23 + 30 * index);
+            terrtoryTextBox.Location = new Point(10, 15 + 30 * index);
             terrtoryTextBox.Name = territoryName + "_TextBox";
             terrtoryTextBox.Size = new Size(134, 22);
             terrtoryTextBox.Text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(territoryName);
@@ -169,7 +179,7 @@ namespace RISKSandboxUtility
 
             setTroopsButton.BackgroundImage = Properties.Resources.TroopsImage;
             setTroopsButton.BackgroundImageLayout = ImageLayout.Stretch;
-            setTroopsButton.Location = new Point(172, 23 + 30 * index);
+            setTroopsButton.Location = new Point(172, 15 + 30 * index);
             setTroopsButton.Name = territoryName + "_Troops_Button";
             setTroopsButton.Size = new Size(32, 23);
             setTroopsButton.UseVisualStyleBackColor = true;
@@ -177,7 +187,7 @@ namespace RISKSandboxUtility
 
             setCapitalButton.BackgroundImage = Properties.Resources.CapitalImage;
             setCapitalButton.BackgroundImageLayout = ImageLayout.Stretch;
-            setCapitalButton.Location = new Point(210, 23 + 30 * index);
+            setCapitalButton.Location = new Point(210, 15 + 30 * index);
             setCapitalButton.Name = territoryName + "_Capital_Button";
             setCapitalButton.Size = new Size(32, 23);
             setCapitalButton.UseVisualStyleBackColor = true;
@@ -185,7 +195,7 @@ namespace RISKSandboxUtility
 
             setBlizzardButton.BackgroundImage = Properties.Resources.BlizzardImage;
             setBlizzardButton.BackgroundImageLayout = ImageLayout.Stretch;
-            setBlizzardButton.Location = new Point(249, 23 + 30 * index);
+            setBlizzardButton.Location = new Point(249, 15 + 30 * index);
             setBlizzardButton.Name = territoryName + "_Blizzard_Button";
             setBlizzardButton.Size = new Size(32, 23);
             setBlizzardButton.UseVisualStyleBackColor = true;
@@ -200,6 +210,33 @@ namespace RISKSandboxUtility
             territoryButtons.Add(new List<Button>() { setTroopsButton, setCapitalButton, setBlizzardButton });
         }
 
+        private void AddPlayerInTool(string playerColor, int index)
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKHack));
+            TextBox playerTextBox = new TextBox();
+            Button setTroopsButton = new Button();
+
+            playerTextBox.BackColor = SystemColors.Control;
+            playerTextBox.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            playerTextBox.Location = new Point(10, 15 + 30 * index);
+            playerTextBox.Name = playerColor + "_TextBox";
+            playerTextBox.Size = new Size(134, 22);
+            playerTextBox.Text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(playerColor);
+            playerTextBox.ReadOnly = true;
+            playerTextBox.TabStop = false;
+
+            setTroopsButton.BackgroundImage = Properties.Resources.TroopsImage;
+            setTroopsButton.BackgroundImageLayout = ImageLayout.Stretch;
+            setTroopsButton.Location = new Point(172, 15 + 30 * index);
+            setTroopsButton.Name = playerColor + "_Troops_Button";
+            setTroopsButton.Size = new Size(32, 23);
+            setTroopsButton.UseVisualStyleBackColor = true;
+            setTroopsButton.Click += SetPlayerTroopsButton_Click;
+
+            playersPanel.Controls.Add(playerTextBox);
+            playersPanel.Controls.Add(setTroopsButton);
+        }
+
         private void SetCapitalButton_Click(object sender, EventArgs e)
         {
             var territoryName = ((Button)sender).Name.Split("_")[0];
@@ -210,7 +247,7 @@ namespace RISKSandboxUtility
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
             WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
-                BitConverter.GetBytes((int)TerritoryType.Capital),  MemoryConstants.INT_BYTES, out bytesRead);
+                BitConverter.GetBytes((int)TerritoryType.Capital), MemoryConstants.INT_BYTES, out bytesRead);
         }
 
         private void SetBlizzardButton_Click(object sender, EventArgs e)
@@ -222,9 +259,9 @@ namespace RISKSandboxUtility
         private void SetBlizzard(String territoryName)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET, 
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
                 BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET, 
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET,
                 BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
             WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
                 BitConverter.GetBytes((int)TerritoryType.Blizzard), MemoryConstants.INT_BYTES, out bytesRead);
@@ -234,10 +271,20 @@ namespace RISKSandboxUtility
         {
             var territoryName = ((Button)sender).Name.Split("_")[0];
             var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox(
-                "How many troops would you like on " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(territoryName), 
-                "Set Troops", 
+                "How many troops would you like on " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(territoryName) + "?",
+                "Set Troops",
                 ""));
             SetTroops(territoryName, troopCount);
+        }
+
+        private void SetPlayerTroopsButton_Click(object sender, EventArgs e)
+        {
+            var playerColor = ((Button)sender).Name.Split("_")[0];
+            var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox(
+                "How many troops would you like for the " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(playerColor) + " player?",
+                "Set Troops",
+                ""));
+            SetPlayerTroops(playerColor, troopCount);
         }
 
         private void SetTroops(String territoryName, int troopCount)
@@ -247,11 +294,18 @@ namespace RISKSandboxUtility
                 BitConverter.GetBytes(troopCount), MemoryConstants.POINTER_BYTES, out bytesRead);
         }
 
-        private void SetColor(String territoryName, String color) 
+        private void SetPlayerTroops(String playerColor, int troopCount)
+        {
+            IntPtr playerPtr = playerColorsToAddresses[playerColor];
+            WriteProcessMemory(riskProcess.Handle, playerPtr + PlayerOffsets.PLACEABLE_TROOPS_OFFSET,
+                BitConverter.GetBytes(troopCount), MemoryConstants.POINTER_BYTES, out bytesRead);
+        }
+
+        private void SetColor(String territoryName, String color)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
             IntPtr playerPtr = playerColorsToAddresses[color];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET, 
+            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET,
                 BitConverter.GetBytes(playerPtr.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
         }
 
@@ -286,7 +340,7 @@ namespace RISKSandboxUtility
             foreach (var line in lines)
             {
                 var fields = line.ToLower().Split(',');
-                if (fields.Length != CSVConstants.NUM_COLS 
+                if (fields.Length != CSVConstants.NUM_COLS
                     || !territoryNamesToAdresses.ContainsKey(fields[CSVConstants.TERRITORY_NAME])
                     || !playerColorsToAddresses.ContainsKey(fields[CSVConstants.COLOR])
                     || !int.TryParse(fields[CSVConstants.TERRITORY_TYPE], out _)
